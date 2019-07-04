@@ -1,4 +1,4 @@
-#How to run
+# How to run
 Little intruduction how to run this app using uwsgi.(However you can use any wsgi servers)
 
 `pip install uwsgi`

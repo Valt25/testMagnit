@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Comments</title>
+</head>
+<body>
+<table id="comment-table">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Имя</th>
+
+        <th>Фамилия</th>
+        <th>Отчество</th>
+        <th>Город</th>
+        <th>Телефон</th>
+        <th>Email</th>
+        <th>Comment</th>
+    </tr>
+    </thead>
+    <tbody id="comment-table-body">
+
+    </tbody>
+</table>
+<script>
+    fetch('/api/comment/').then((response) => {
+        return response.json()
+    }).then((comments) => {
+        const tbody = document.getElementById('comment-table-body');
+        for (const comment of comments) {
+            const newTableRow = document.createElement('tr');
+            const tableData = generateData(comment);
+            for (const data of tableData) {
+                newTableRow.appendChild(data);
+            }
+            tbody.appendChild(newTableRow);
+        }
+    });
+
+    function generateData(comment) {
+        return [createTableData(comment.id),
+            createTableData(comment.name),
+            createTableData(comment.surname),
+            createTableData(comment.father_name),
+            createTableData(comment.city),
+            createTableData(comment.phone),
+            createTableData(comment.email),
+            createTableData(comment.comment),
+            createDeleteButton(comment)
+
+        ];
+
+    }
+
+    function createTableData(value) {
+        const td = document.createElement('td');
+        td.appendChild(document.createTextNode(value))
+        return td
+    }
+
+    function createDeleteButton(comment) {
+        const td = document.createElement('td');
+        let button = document.createElement('button');
+        button.appendChild(document.createTextNode('Удалить'));
+        td.appendChild(button);
+        button.onclick = () => {
+            const formData = new FormData();
+            formData.append('comment_id', comment.id);
+            fetch('/api/comment', {
+                method: 'delete',
+                body: `comment_id=${comment.id}`
+            }).then(response => {
+                    deleteRow(comment.id);
+
+                }
+            );
+        };
+        return td
+    }
+
+    function deleteRow(comment_id) {
+        var table = document.getElementById("comment-table");
+        for (var i = 0, row; row = table.rows[i]; i++) {
+            const id = row.cells[0].textContent;
+            if (id === String(comment_id)) {
+                table.deleteRow(i);
+                return
+            }
+        }
+    }
+</script>
+</body>
+</html>

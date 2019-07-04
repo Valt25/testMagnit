@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Статистика</title>
+</head>
+<body>
+<table id="top-region-table">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>Регион</th>
+        <th>Количество комментариев</th>
+    </tr>
+    </thead>
+    <tbody id="top-region-table-body">
+
+    </tbody>
+</table>
+
+<table id="all-region-table">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>Регион</th>
+        <th>Количество комментариев</th>
+    </tr>
+    </thead>
+    <tbody id="all-region-table-body">
+
+    </tbody>
+</table>
+<p>
+    Строки кликабельны
+</p>
+<table id="cities-table">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>Регион</th>
+        <th>Город</th>
+        <th>Количество комментариев</th>
+    </tr>
+    </thead>
+    <tbody id="cities-table-body">
+
+    </tbody>
+</table>
+
+<script>
+    fetch('/api/regions/popular?amount=5').then((response) => {
+        return response.json()
+    }).then((regions) => {
+        const tbody = document.getElementById('top-region-table-body');
+        for (const region of regions) {
+            const newTableRow = document.createElement('tr');
+            const tableData = generateDataFromRegion(region);
+            for (const data of tableData) {
+                newTableRow.appendChild(data);
+            }
+            tbody.appendChild(newTableRow);
+        }
+    });
+
+    fetch('/api/regions/popular/').then((response) => {
+        return response.json()
+    }).then((regions) => {
+        const tbody = document.getElementById('all-region-table-body');
+        for (const region of regions) {
+            const newTableRow = document.createElement('tr');
+            const tableData = generateDataFromRegion(region);
+            for (const data of tableData) {
+                newTableRow.appendChild(data);
+            }
+            newTableRow.onclick = () => {
+                fetch(`/api/cities/comment/amount?region_id=${region.id}`).then((response) => {
+                    return response.json()
+                }).then((cities) => {
+                    const tbody = document.getElementById('cities-table-body');
+                    const table = document.getElementById('cities-table');
+                    let table_length = table.rows.length;
+
+                    for (var i = 1; i < table_length; i++) {
+                        table.deleteRow(1);
+                    }
+                    for (const city of cities) {
+                        const newTableRow = document.createElement('tr');
+                        const tableData = generateDataFromCity(city, region.name);
+                        for (const data of tableData) {
+                            newTableRow.appendChild(data);
+                        }
+                        tbody.appendChild(newTableRow);
+                    }
+                });
+            };
+            tbody.appendChild(newTableRow);
+        }
+    });
+
+    function generateDataFromRegion(region) {
+        return [createTableData(region.id),
+            createTableData(region.name),
+            createTableData(region.comment_amount)
+        ];
+
+    }
+
+    function generateDataFromCity(city, region_name) {
+        return [createTableData(city.id),
+            createTableData(city.name),
+            createTableData(region_name),
+
+            createTableData(city.comment_amount)
+        ];
+
+    }
+
+    function createTableData(value) {
+        const td = document.createElement('td');
+        td.appendChild(document.createTextNode(value));
+        return td
+    }
+
+</script>
+</body>
+</html>

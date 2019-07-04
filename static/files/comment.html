@@ -1,0 +1,80 @@
+<html>
+<head>
+    <title>Test magnit</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+</head>
+<style>
+    label {
+        display: block;
+        margin: 5px;
+    }
+
+    textarea:invalid, select:invalid, input:invalid {
+        border: 2px solid red;
+    }
+
+    textarea:valid, select:valid, input:valid {
+        border: 2px solid green;
+    }
+</style>
+<body>
+<form action="/api/comment/" method="post">
+    <label>Фамилия:<input type="text" name="surname" required></label>
+    <label>Имя:<input type="text" name="name" required></label>
+
+    <label>Отчество:<input type="text" name="father_name"></label>
+    <label>Регион:
+        <select id="region-select" onchange="regionSelected()">
+            <option disabled>Выберете город</option>
+        </select>
+    </label>
+    <label>Город:
+        <select name="town" id="city-select">
+            <option disabled>Выберете город</option>
+        </select></label>
+    <label>Телефон(в формате "(код города) номер"):<input type="tel" name="phone" pattern="\([0-9]{3}\) [0-9]*"></label>
+    <label>Электронная почта:<input type="email" name="email"></label>
+    <label>Комментарий:<textarea name="comment" required></textarea></label>
+    <input type="submit" value="Отправить">
+
+</form>
+<script>
+    fetch('/api/regions/')
+        .then(function (response) {
+            return response.json();
+        }).then((responseJSON) => {
+        const select = document.getElementById('region-select');
+        for (let region of responseJSON) {
+            let opt = document.createElement('option');
+            opt.appendChild(document.createTextNode(region.name));
+            opt.value = region.id;
+            select.appendChild(opt);
+        }
+        select.selectedIndex = -1;
+    });
+
+    function regionSelected() {
+        const regionId = document.getElementById('region-select').value;
+        fetch(`/api/cities?region_id=${regionId}`).then((response) => {
+            return response.json()
+        }).then((cities) => {
+            const select = document.getElementById('city-select');
+            const length = select.options.length;
+            select.selectedIndex = -1;
+
+            for (let i = 0; i <= length; i++) {
+                select.options[0] = null;
+            }
+            for (let city of cities) {
+                let opt = document.createElement('option');
+                opt.appendChild(document.createTextNode(city.name));
+                opt.value = city.id;
+                select.appendChild(opt);
+            }
+
+        })
+    }
+</script>
+
+</body>
+</html>
